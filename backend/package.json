@@ -6,8 +6,9 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "prisma generate && npx nest build",
-    "build:render": "npm ci && prisma generate && npx nest build",
+    "build": "prisma generate && npx tsc -p tsconfig.build.json",
+    "build:nest": "prisma generate && npx nest build",
+    "build:render": "npm ci && prisma generate && npx tsc -p tsconfig.build.json",
     "postinstall": "prisma generate",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
@@ -38,12 +39,12 @@
     "passport-local": "^1.0.0",
     "prisma": "^6.19.0",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "@nestjs/cli": "^11.0.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.18.0",
-    "@nestjs/cli": "^11.0.0",
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/testing": "^11.0.1",
     "@swc/cli": "^0.6.0",
