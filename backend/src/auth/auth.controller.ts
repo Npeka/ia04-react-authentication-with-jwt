@@ -11,10 +11,17 @@ import {
 import { AuthService } from './auth.service';
 import { LocalAuthGuard, JwtAuthGuard } from './guards/auth.guard';
 import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
+
+  @Post('register')
+  @HttpCode(HttpStatus.CREATED)
+  async register(@Body() registerDto: RegisterDto) {
+    return this.authService.register(registerDto);
+  }
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
