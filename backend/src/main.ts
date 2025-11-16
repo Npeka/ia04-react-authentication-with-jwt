@@ -7,9 +7,11 @@ async function bootstrap() {
 
   // Enable CORS for frontend
   app.enableCors({
-    origin: process.env.NODE_ENV === 'production' 
-      ? process.env.FRONTEND_URL || 'https://your-frontend-domain.onrender.com'
-      : 'http://localhost:5173',
+    origin:
+      process.env.NODE_ENV === 'production'
+        ? process.env.FRONTEND_URL ||
+          'https://your-frontend-domain.onrender.com'
+        : 'http://localhost:5173',
     credentials: true,
   });
 
