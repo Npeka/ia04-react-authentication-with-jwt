@@ -1,10 +1,17 @@
-import React, { createContext, useContext, useReducer, useEffect } from "react";
+import {
+  createContext,
+  useContext,
+  useReducer,
+  useEffect,
+  type ReactNode,
+} from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { authService } from "../services/authService";
 import type {
   AuthContextType,
   AuthState,
   LoginCredentials,
+  RegisterCredentials,
   User,
 } from "../types/auth";
 
@@ -64,9 +71,7 @@ const initialState: AuthState = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
   // Query to get user profile on app start (if refresh token exists)
@@ -93,6 +98,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     },
   });
 
+  // Register mutation
+  const registerMutation = useMutation({
+    mutationFn: (credentials: Omit<RegisterCredentials, "confirmPassword">) =>
+      authService.register(credentials),
+    onSuccess: (response) => {
+      dispatch({ type: "SET_USER", payload: response.user });
+    },
+  });
+
   // Logout mutation
   const logoutMutation = useMutation({
     mutationFn: () => authService.logout(),
@@ -116,6 +130,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     await loginMutation.mutateAsync(credentials);
   };
 
+  const register = async (
+    credentials: Omit<RegisterCredentials, "confirmPassword">
+  ) => {
+    try {
+      await registerMutation.mutateAsync(credentials);
+      return { success: true };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.response?.data?.message || "Registration failed",
+      };
+    }
+  };
+
   const logout = () => {
     logoutMutation.mutate();
   };
@@ -127,6 +155,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const value: AuthContextType = {
     ...state,
     login,
+    register,
     logout,
     refreshToken,
   };

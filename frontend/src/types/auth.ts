@@ -9,6 +9,13 @@ export interface LoginCredentials {
   password: string;
 }
 
+export interface RegisterCredentials {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+}
+
 export interface AuthResponse {
   access_token: string;
   refresh_token: string;
@@ -27,6 +34,9 @@ export interface AuthState {
 
 export interface AuthContextType extends AuthState {
   login: (credentials: LoginCredentials) => Promise<void>;
+  register: (
+    credentials: Omit<RegisterCredentials, "confirmPassword">
+  ) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   refreshToken: () => Promise<string>;
 }

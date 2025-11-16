@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Navigate, useLocation } from "react-router-dom";
+import { Navigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import type { LoginCredentials } from "../types/auth";
 
-export const LoginPage: React.FC = () => {
+export const LoginPage = () => {
   const { login, isAuthenticated, isLoading } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string>("");
@@ -147,16 +147,16 @@ export const LoginPage: React.FC = () => {
                 "Sign in"
               )}
             </button>
-          </form>
-
-          {/* Demo Credentials */}
-          <div className="mt-6 p-4 bg-dark-700 rounded-md">
-            <p className="text-xs text-gray-400 mb-2">Demo credentials:</p>
-            <div className="text-xs text-gray-300">
-              <p>Email: admin@example.com</p>
-              <p>Password: 123456</p>
+            <div className="text-center">
+              <span className="text-gray-400">Don't have an account? </span>
+              <Link
+                to="/register"
+                className="font-medium text-primary-400 hover:text-primary-300 transition-colors duration-200"
+              >
+                Sign up
+              </Link>
             </div>
-          </div>
+          </form>
         </div>
       </div>
     </div>

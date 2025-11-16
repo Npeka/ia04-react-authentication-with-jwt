@@ -1,4 +1,3 @@
-import React from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -8,6 +7,7 @@ import {
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { LoginPage } from "./pages/LoginPage";
+import { RegisterPage } from "./pages/RegisterPage";
 import { DashboardPage } from "./pages/DashboardPage";
 
 function App() {
@@ -17,6 +17,7 @@ function App() {
         <Routes>
           {/* Public Routes */}
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
 
           {/* Protected Routes */}
           <Route

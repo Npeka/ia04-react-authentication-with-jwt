@@ -1,8 +1,29 @@
 import apiClient from "./api";
 import { tokenStorage } from "../utils/tokenStorage";
-import type { LoginCredentials, AuthResponse, User } from "../types/auth";
+import type {
+  LoginCredentials,
+  RegisterCredentials,
+  AuthResponse,
+  User,
+} from "../types/auth";
 
 export const authService = {
+  async register(
+    credentials: Omit<RegisterCredentials, "confirmPassword">
+  ): Promise<AuthResponse> {
+    const response = await apiClient.post<AuthResponse>(
+      "/auth/register",
+      credentials
+    );
+    const { access_token, refresh_token } = response.data;
+
+    // Store tokens
+    tokenStorage.setAccessToken(access_token);
+    tokenStorage.setRefreshToken(refresh_token);
+
+    return response.data;
+  },
+
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     const response = await apiClient.post<AuthResponse>(
       "/auth/login",

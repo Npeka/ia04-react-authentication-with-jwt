@@ -1,8 +1,7 @@
-import React from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 
-export const DashboardPage: React.FC = () => {
+export const DashboardPage = () => {
   const { user, logout, isLoading } = useAuth();
 
   const handleLogout = () => {
