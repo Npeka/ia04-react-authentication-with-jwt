@@ -39,6 +39,13 @@ const processQueue = (error: any, token: string | null = null) => {
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = tokenStorage.getAccessToken();
+    console.log("🔑 API Request - Token check:", {
+      hasToken: !!token,
+      tokenPreview: token ? token.substring(0, 30) + "..." : "No token",
+      url: config.url,
+      method: config.method?.toUpperCase(),
+    });
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -52,9 +59,21 @@ apiClient.interceptors.request.use(
 // Response interceptor to handle token refresh
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => {
+    console.log("✅ API Response Success:", {
+      url: response.config.url,
+      status: response.status,
+      method: response.config.method?.toUpperCase(),
+    });
     return response;
   },
   async (error) => {
+    console.log("❌ API Response Error:", {
+      url: error.config?.url,
+      status: error.response?.status,
+      message: error.response?.data?.message || error.message,
+      method: error.config?.method?.toUpperCase(),
+    });
+
     const originalRequest = error.config;
 
     if (error.response?.status === 401 && !originalRequest._retry) {

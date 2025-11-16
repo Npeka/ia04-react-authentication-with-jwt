@@ -1,11 +1,82 @@
 import { useAuth } from "../contexts/AuthContext";
 import { LoadingSpinner } from "../components/LoadingSpinner";
+import { useState } from "react";
+import apiClient from "../services/api";
+import { tokenStorage } from "../utils/tokenStorage";
 
 export const DashboardPage = () => {
-  const { user, logout, isLoading } = useAuth();
+  const { user, logout, isLoading, refreshToken } = useAuth();
+  const [apiTest, setApiTest] = useState<{
+    status: "idle" | "loading" | "success" | "error";
+    data?: any;
+    error?: string;
+  }>({ status: "idle" });
 
   const handleLogout = () => {
     logout();
+  };
+
+  const handleTestAPI = async () => {
+    setApiTest({ status: "loading" });
+    try {
+      const response = await apiClient.get("/auth/profile");
+      setApiTest({
+        status: "success",
+        data: response.data,
+      });
+    } catch (error: any) {
+      setApiTest({
+        status: "error",
+        error:
+          error.response?.data?.message || error.message || "API call failed",
+      });
+    }
+  };
+
+  const handleRefreshToken = async () => {
+    setApiTest({ status: "loading" });
+    try {
+      const newToken = await refreshToken();
+      setApiTest({
+        status: "success",
+        data: {
+          message: "Token refreshed successfully",
+          token: newToken.substring(0, 20) + "...",
+        },
+      });
+    } catch (error: any) {
+      setApiTest({
+        status: "error",
+        error: error.message || "Token refresh failed",
+      });
+    }
+  };
+
+  const handleViewToken = () => {
+    const accessToken = tokenStorage.getAccessToken();
+    const refreshTokenValue = tokenStorage.getRefreshToken();
+
+    if (!accessToken && !refreshTokenValue) {
+      setApiTest({
+        status: "error",
+        error: "No tokens found in storage",
+      });
+      return;
+    }
+
+    setApiTest({
+      status: "success",
+      data: {
+        hasAccessToken: !!accessToken,
+        hasRefreshToken: !!refreshTokenValue,
+        accessTokenPreview: accessToken
+          ? accessToken.substring(0, 30) + "..."
+          : "None",
+        refreshTokenPreview: refreshTokenValue
+          ? refreshTokenValue.substring(0, 30) + "..."
+          : "None",
+      },
+    });
   };
 
   if (isLoading) {
@@ -148,11 +219,68 @@ export const DashboardPage = () => {
               attached to all requests via Axios interceptors.
             </p>
 
-            <div className="flex flex-wrap gap-4">
-              <button className="btn-primary">Test Protected API</button>
-              <button className="btn-secondary">Refresh Token</button>
-              <button className="btn-ghost">View Network Tab</button>
+            <div className="flex flex-wrap gap-4 mb-6">
+              <button
+                onClick={handleTestAPI}
+                disabled={apiTest.status === "loading"}
+                className="btn-primary disabled:opacity-50"
+              >
+                {apiTest.status === "loading"
+                  ? "Testing..."
+                  : "Test Protected API"}
+              </button>
+              <button
+                onClick={handleRefreshToken}
+                disabled={apiTest.status === "loading"}
+                className="btn-secondary disabled:opacity-50"
+              >
+                {apiTest.status === "loading"
+                  ? "Refreshing..."
+                  : "Refresh Token"}
+              </button>
+              <button onClick={handleViewToken} className="btn-ghost">
+                View Token Info
+              </button>
             </div>
+
+            {/* API Test Results */}
+            {apiTest.status !== "idle" && (
+              <div
+                className={`p-4 rounded-lg border ${
+                  apiTest.status === "success"
+                    ? "bg-green-900/20 border-green-500/30"
+                    : apiTest.status === "error"
+                    ? "bg-red-900/20 border-red-500/30"
+                    : "bg-blue-900/20 border-blue-500/30"
+                }`}
+              >
+                <h4 className="font-medium text-white mb-2">
+                  API Test Result:
+                </h4>
+                {apiTest.status === "loading" && (
+                  <div className="flex items-center text-blue-400">
+                    <LoadingSpinner size="sm" />
+                    <span className="ml-2">Loading...</span>
+                  </div>
+                )}
+                {apiTest.status === "success" && (
+                  <div className="text-green-400">
+                    <p className="mb-2">✅ Success!</p>
+                    <pre className="bg-dark-800 p-3 rounded text-sm overflow-auto">
+                      {JSON.stringify(apiTest.data, null, 2)}
+                    </pre>
+                  </div>
+                )}
+                {apiTest.status === "error" && (
+                  <div className="text-red-400">
+                    <p className="mb-2">❌ Error:</p>
+                    <p className="bg-dark-800 p-3 rounded text-sm">
+                      {apiTest.error}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </main>

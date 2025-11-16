@@ -7,6 +7,7 @@ import {
 } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { authService } from "../services/authService";
+import { tokenStorage } from "../utils/tokenStorage";
 import type {
   AuthContextType,
   AuthState,
@@ -75,9 +76,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
   // Query to get user profile on app start (if refresh token exists)
-  const { data: user, error } = useQuery({
+  const {
+    data: user,
+    error,
+  } = useQuery({
     queryKey: ["profile"],
-    queryFn: () => authService.getProfile(),
+    queryFn: () => {
+      console.log("🔍 Fetching user profile...", {
+        hasRefreshToken: authService.isAuthenticated(),
+        hasAccessToken: !!tokenStorage.getAccessToken(),
+      });
+      return authService.getProfile();
+    },
     enabled: authService.isAuthenticated(),
     retry: false,
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -117,11 +127,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // Effect to handle profile query results
   useEffect(() => {
+    console.log("👤 Auth Context Effect:", {
+      hasUser: !!user,
+      hasError: !!error,
+      errorMessage: error?.message,
+      isAuthenticated: authService.isAuthenticated(),
+      hasRefreshToken: tokenStorage.hasRefreshToken(),
+      hasAccessToken: !!tokenStorage.getAccessToken(),
+    });
+
     if (user) {
+      console.log("✅ Setting user in context:", user);
       dispatch({ type: "SET_USER", payload: user });
     } else if (error) {
+      console.log("❌ Profile fetch error, logging out:", error);
       dispatch({ type: "LOGOUT" });
     } else if (!authService.isAuthenticated()) {
+      console.log("ℹ️ Not authenticated, stopping loading");
       dispatch({ type: "SET_LOADING", payload: false });
     }
   }, [user, error]);
