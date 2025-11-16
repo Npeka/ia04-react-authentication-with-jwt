@@ -21,9 +21,7 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
-  console.log(
-    `CORS configuration: ${JSON.stringify(app.getHttpAdapter().getInstance()._events.request._corsOptions)}`,
-  );
+  console.log(`CORS configuration: ${process.env.FRONTEND_URL}`);
 
   // Enable validation
   app.useGlobalPipes(new ValidationPipe());
