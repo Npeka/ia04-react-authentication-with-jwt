@@ -7,14 +7,17 @@ async function bootstrap() {
 
   // Enable CORS for frontend
   app.enableCors({
-    origin: 'http://localhost:5173', // Vite dev server
+    origin: process.env.NODE_ENV === 'production' 
+      ? process.env.FRONTEND_URL || 'https://your-frontend-domain.onrender.com'
+      : 'http://localhost:5173',
     credentials: true,
   });
 
   // Enable validation
   app.useGlobalPipes(new ValidationPipe());
 
-  await app.listen(process.env.PORT ?? 3001);
-  console.log('Backend running on http://localhost:3001');
+  const port = process.env.PORT || 3001;
+  await app.listen(port);
+  console.log(`Backend running on port ${port}`);
 }
 bootstrap();
